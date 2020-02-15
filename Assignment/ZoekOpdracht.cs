@@ -72,9 +72,10 @@ namespace Assignment
                 }));
                 timer.Stop();
                 // if this was not the last round, we need to wait until our minute's up before we can do more API calls
-                if (batchIndex < resterendePaginaNummerBatches.Length)
+                if (batchIndex + 1 < resterendePaginaNummerBatches.Length)
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(1).Subtract(timer.Elapsed));
+                    var restVanMinuut = TimeSpan.FromMinutes(1).Subtract(timer.Elapsed);
+                    await Task.Delay(restVanMinuut);
                 }
             }
         }
