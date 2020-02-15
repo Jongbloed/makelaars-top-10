@@ -36,8 +36,7 @@ namespace Assignment
 
         public Makelaar[] GetTopTen() // TODO test the output of this method
         {
-            return makelaars
-                .Select(x => x.Value)
+            return makelaars.Values
                 .OrderByDescending(x => x.AantalListings)
                 .ThenBy(x => x.MakelaarNaam)
                 .Take(10)
