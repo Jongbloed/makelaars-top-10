@@ -17,20 +17,20 @@ namespace Assignment
     {
         private readonly Dictionary<int, Makelaar> makelaars = new Dictionary<int, Makelaar>();
 
-        public void AddListings(IEnumerable<WoonObject> listings)
+        public void AddListings(IEnumerable<WoonObject> woonObjecten)
         {
-            foreach (var l in listings)
+            foreach (var woonObject in woonObjecten)
             {
-                if (makelaars.ContainsKey(l.MakelaarId))
+                if (makelaars.ContainsKey(woonObject.MakelaarId))
                 {
-                    makelaars[l.MakelaarId].AantalListings++;
+                    makelaars[woonObject.MakelaarId].AantalListings++;
                 }
                 else
                 {
-                    makelaars[l.MakelaarId] = new Makelaar
+                    makelaars[woonObject.MakelaarId] = new Makelaar
                     {
-                        MakelaarId = l.MakelaarId,
-                        MakelaarNaam = l.MakelaarNaam,
+                        MakelaarId = woonObject.MakelaarId,
+                        MakelaarNaam = woonObject.MakelaarNaam,
                         AantalListings = 1
                     };
                 }
