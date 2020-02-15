@@ -1,10 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Net.Http;
-using System.Xml;
-using Newtonsoft.Json;
-using System.Xml.Serialization;
-using System.Linq;
 using System.Collections.Concurrent;
 
 namespace Assignment
@@ -38,15 +32,20 @@ namespace Assignment
                 Console.Clear();
                 Console.WriteLine($"Top 10 makelaars koop {zoekOpdrachtLabel}");
                 Console.WriteLine("Spanning erin houden? (y/n)");
-                var topTenDisplayTask = new TopTienWeergaveTaak(queue, makelaars => new ConsoleTable(makelaars).Print());
+                var topTenDisplayTask = new TopTienWeergaveTaak(
+                    useDelay: Console.ReadKey().KeyChar == 'y',
+                    inputQueue: queue, 
+                    outputAction: makelaars => new ConsoleTable(makelaars).Print()
+                );
                 topTenDisplayTask.Start();
-                topTenDisplayTask.Slow = Console.ReadKey().KeyChar == 'y';
                 Console.Clear();
 
-                var bron = new ZoekOpdracht(zoekOpdracht);
-                bron.FetchAllAsync(queue); // TODO do not block
+                using (var bron = new Fetcher(new WoonObjectBron(zoekOpdracht)))
+                {
+                    bron.FetchAllAsync(queue);
 
-                Console.ReadKey();
+                    Console.ReadKey();
+                }
                 topTenDisplayTask.Stop();
             }
         }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Assignment
@@ -11,15 +9,15 @@ namespace Assignment
         private readonly BlockingCollection<WoonObject[]> queue;
         private readonly TopTen topTen;
         private readonly Action<Makelaar[]> outputAction;
-        public bool Slow;
-        private Task task;
+        private readonly bool useDelay;
         private bool run;
 
-        public TopTienWeergaveTaak(BlockingCollection<WoonObject[]> queue, Action<Makelaar[]> outputAction)
+        public TopTienWeergaveTaak(BlockingCollection<WoonObject[]> inputQueue, Action<Makelaar[]> outputAction, bool useDelay)
         {
-            this.queue = queue;
+            this.queue = inputQueue;
             this.topTen = new TopTen();
             this.outputAction = outputAction;
+            this.useDelay = useDelay;
         }
 
         public void Stop() => run = false; // TODO cancellationToken would be nicer
@@ -27,14 +25,14 @@ namespace Assignment
         public void Start()
         {
             run = true;
-            this.task = Task.Run(() =>
+            Task.Run(() =>
             {
                 while (run)
                 {
                     var meerObjecten = queue.Take();
-                    topTen.AddListings(meerObjecten);
+                    topTen.AddWoonObjecten(meerObjecten);
                     outputAction(topTen.GetTopTen());
-                    if (Slow)
+                    if (useDelay)
                     {
                         Task.Delay(300).Wait();
                     }
