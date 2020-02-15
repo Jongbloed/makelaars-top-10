@@ -11,40 +11,40 @@ namespace Assignment
         public int MakelaarId;
         public string MakelaarNaam;
         public int AantalListings;
-
-        public Makelaar Copy() => (Makelaar)MemberwiseClone();
     }
 
     class TopTen
     {
-        readonly ConcurrentDictionary<int, Makelaar> makelaars = new ConcurrentDictionary<int, Makelaar>();
+        private readonly Dictionary<int, Makelaar> makelaars = new Dictionary<int, Makelaar>();
 
         public void AddListings(IEnumerable<WoonObject> listings)
         {
             foreach (var l in listings)
             {
-                makelaars.AddOrUpdate(
-                    key: l.MakelaarId,
-                    addValue: new Makelaar { MakelaarId = l.MakelaarId, MakelaarNaam = l.MakelaarNaam, AantalListings = 1 },
-                    updateValueFactory: (int makelaarId, Makelaar current) =>
+                if (makelaars.ContainsKey(l.MakelaarId))
+                {
+                    makelaars[l.MakelaarId].AantalListings++;
+                }
+                else
+                {
+                    makelaars[l.MakelaarId] = new Makelaar
                     {
-                        var copy = current.Copy();
-                        copy.AantalListings++; // TODO is this necessary? Doesn't ConcurrentDict lock the item for us until this lambda is done?
-                        return copy;
-                    }
-                );
+                        MakelaarId = l.MakelaarId,
+                        MakelaarNaam = l.MakelaarNaam,
+                        AantalListings = 1
+                    };
+                }
             }
         }
 
         public Makelaar[] GetTopTen() // TODO test the output of this method
         {
-            var snapshot = makelaars.ToArray()
-                .Select(x => x.Value.Copy())
-                .OrderByDescending(m => m.AantalListings)
+            return makelaars.ToArray()
+                .Select(x => x.Value)
+                .OrderByDescending(x => x.AantalListings)
                 .ThenBy(x => x.MakelaarNaam)
                 .Take(10)
                 .ToArray();
-            return snapshot;
         }
     }
 }
