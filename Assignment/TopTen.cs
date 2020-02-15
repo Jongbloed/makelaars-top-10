@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Assignment
 {
@@ -39,7 +36,7 @@ namespace Assignment
 
         public Makelaar[] GetTopTen() // TODO test the output of this method
         {
-            return makelaars.ToArray()
+            return makelaars
                 .Select(x => x.Value)
                 .OrderByDescending(x => x.AantalListings)
                 .ThenBy(x => x.MakelaarNaam)
