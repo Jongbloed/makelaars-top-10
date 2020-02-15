@@ -14,7 +14,7 @@ namespace Assignment
     {
         private readonly Dictionary<int, Makelaar> makelaars = new Dictionary<int, Makelaar>();
 
-        public void AddListings(WoonObject[] woonObjecten)
+        public void AddWoonObjecten(WoonObject[] woonObjecten)
         {
             foreach (var woonObject in woonObjecten)
             {
