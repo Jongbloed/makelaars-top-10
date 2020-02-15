@@ -37,10 +37,14 @@ namespace Assignment
                 Console.Clear();
                 Console.WriteLine($"Top 10 makelaars koop {zoekOpdrachtLabel}");
                 Console.WriteLine("Spanning erin houden? (y/n)");
+                var progress = new FetchProgress();
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 var topTenDisplayTask = new TopTienWeergaveTaak(
                     useDelay: Console.ReadKey().KeyChar == 'y',
-                    inputQueue: queue, 
-                    outputAction: makelaars => new ConsoleTable(makelaars).Print()
+                    inputQueue: queue,
+                    progress: progress,
+                    outputAction: makelaars => new ConsoleTable(makelaars).Print(),
+                    cancellationToken: cancellationTokenSource.Token
                 );
                 topTenDisplayTask.Start();
                 Console.Clear();
@@ -49,8 +53,7 @@ namespace Assignment
                 {
                     using (var bron = new Fetcher(new WoonObjectBron(zoekOpdracht)))
                     {
-                        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                        taak = bron.FetchAllAsync(queue, cancellationTokenSource.Token);
+                        taak = bron.FetchAllAsync(queue, progress, cancellationTokenSource.Token);
 
                         Console.ReadKey();
                         cancellationTokenSource.Cancel();
@@ -69,10 +72,6 @@ namespace Assignment
                         Console.ReadKey();
                         return -1;
                     }
-                }
-                finally
-                {
-                    topTenDisplayTask.Stop();
                 }
             }
             return 0;

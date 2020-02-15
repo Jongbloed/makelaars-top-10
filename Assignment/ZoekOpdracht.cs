@@ -81,6 +81,18 @@ namespace Assignment
         public void Dispose() => httpClient.Dispose();
     }
 
+    class FetchProgress
+    {
+        public void Print()
+        {
+            Console.SetCursorPosition(2, 16);
+            Console.Write($"|{new string(PagesComplete.Select(b => b ? '×' : ' ').ToArray())}| {ProgressPercentageString()}");
+        }
+        public bool[] PagesComplete = new bool[0];
+        public string ProgressPercentageString() =>
+            $"{PagesComplete.Count(x => x) / (float)PagesComplete.Length:P0} geladen...";
+    }
+
     class Fetcher : IDisposable
     {
         private readonly IWoonObjectBron bron;
@@ -92,9 +104,12 @@ namespace Assignment
 
         public void Dispose() => bron.Dispose();
 
-        public async Task FetchAllAsync(BlockingCollection<WoonObject[]> outputQueue, CancellationToken cancellationToken)
+        public async Task FetchAllAsync(BlockingCollection<WoonObject[]> outputQueue, FetchProgress progress, CancellationToken cancellationToken)
         {
             var eerstePagina = await bron.HaalPagina(1, cancellationToken);
+            var aantalPaginas = eerstePagina.Paging.AantalPaginas;
+            progress.PagesComplete = new bool[aantalPaginas];
+            progress.PagesComplete[0] = true;
             outputQueue.Add(eerstePagina.Objects);
 
             (int paginaNummer, Task taak)[] startPaginaBatch(IEnumerable<int> batch) {
@@ -103,6 +118,7 @@ namespace Assignment
                     var taak = bron.HaalPagina(paginaNummer, cancellationToken).ContinueWith(t =>
                     {
                         var woonObjecten = t.Result.Objects;
+                        progress.PagesComplete[paginaNummer - 1] = true;
                         outputQueue.Add(woonObjecten);
                     }, TaskContinuationOptions.OnlyOnRanToCompletion);
                     return (paginaNummer, taak);
@@ -110,12 +126,11 @@ namespace Assignment
             }
 
             var resterendePaginaNummerBatches = Enumerable.Range(2, eerstePagina.Paging.AantalPaginas - 1)
-                .Batch(99) /* do not do > 100 requests per minute) */
+                .Batch(99) // do not do > 100 requests per minute, also counting the first one
                 .ToArray();
 
-            var opnieuwProberenPaginanummers = new List<int>();
-
-            for (var batchIndex = 0; batchIndex < resterendePaginaNummerBatches.Length; batchIndex++) {
+            for (var batchIndex = 0; batchIndex < resterendePaginaNummerBatches.Length; batchIndex++)
+            {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var batch = resterendePaginaNummerBatches[batchIndex];
@@ -124,36 +139,13 @@ namespace Assignment
 
                 await Task.WhenAll(takenBatch.Select(x => x.taak));
 
-                foreach (var (paginaNummer, taak) in takenBatch.Where(x => x.taak.IsFaulted))
-                {
-                    if (taak.Exception.Flatten().InnerExceptions.SingleOrDefault() is Exception exception)
-                    {
-                        if (exception is RequestLimitExceededException requestLimitExceededException)
-                        {
-                            opnieuwProberenPaginanummers.Add(paginaNummer);
-                        }
-                        else if (exception is UnexpectedApiResponseException unexpectedApiResponseException)
-                        {
-                            throw new UnexpectedApiResponseException(unexpectedApiResponseException);
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception("One or multiple unexpected things went wrong", taak.Exception);
-                    }
-                }
-
                 timer.Stop();
                 // if this was not the last round, we need to wait until our minute's up before we can do more API calls
                 if (batchIndex + 1 < resterendePaginaNummerBatches.Length)
                 {
                     var restVanMinuut = TimeSpan.FromMinutes(1).Subtract(timer.Elapsed);
-                    await Task.Delay(restVanMinuut);
+                    await Task.Delay(restVanMinuut, cancellationToken);
                 }
-            }
-            if (opnieuwProberenPaginanummers.Any())
-            {
-                // TODO implement retrying
             }
         }
     }

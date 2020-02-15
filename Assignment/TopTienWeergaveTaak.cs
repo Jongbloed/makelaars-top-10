@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Assignment
@@ -10,31 +11,36 @@ namespace Assignment
         private readonly TopTen topTen;
         private readonly Action<Makelaar[]> outputAction;
         private readonly bool useDelay;
-        private bool run;
+        private readonly FetchProgress progress;
+        private readonly CancellationToken cancellationToken;
 
-        public TopTienWeergaveTaak(BlockingCollection<WoonObject[]> inputQueue, Action<Makelaar[]> outputAction, bool useDelay)
+        public TopTienWeergaveTaak(BlockingCollection<WoonObject[]> inputQueue, FetchProgress progress, Action<Makelaar[]> outputAction, bool useDelay, CancellationToken cancellationToken)
         {
             this.queue = inputQueue;
             this.topTen = new TopTen();
             this.outputAction = outputAction;
             this.useDelay = useDelay;
+            this.progress = progress;
+            this.cancellationToken = cancellationToken;
         }
-
-        public void Stop() => run = false; // TODO cancellationToken would be nicer
 
         public void Start()
         {
-            run = true;
             Task.Run(() =>
             {
-                while (run)
+                while (true)
                 {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
                     var meerObjecten = queue.Take();
                     topTen.AddWoonObjecten(meerObjecten);
                     outputAction(topTen.GetTopTen());
+                    progress.Print();
                     if (useDelay)
                     {
-                        Task.Delay(300).Wait();
+                        Task.Delay(300, cancellationToken).Wait();
                     }
                 }
             });
