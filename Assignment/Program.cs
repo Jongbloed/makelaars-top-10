@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Assignment
 {
@@ -24,9 +27,11 @@ namespace Assignment
 
     class Program
     {
-        static void Main()
+        static int Main()
         {
             var queue = new BlockingCollection<WoonObject[]>();
+            Task taak;
+
             foreach (var (zoekOpdrachtLabel, zoekOpdracht) in new[] { ("Amsterdam", "amsterdam"), ("Amsterdam | Tuin", "amsterdam/tuin") })
             {
                 Console.Clear();
@@ -40,14 +45,37 @@ namespace Assignment
                 topTenDisplayTask.Start();
                 Console.Clear();
 
-                using (var bron = new Fetcher(new WoonObjectBron(zoekOpdracht)))
+                try
                 {
-                    bron.FetchAllAsync(queue);
+                    using (var bron = new Fetcher(new WoonObjectBron(zoekOpdracht)))
+                    {
+                        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                        taak = bron.FetchAllAsync(queue, cancellationTokenSource.Token);
 
-                    Console.ReadKey();
+                        Console.ReadKey();
+                        cancellationTokenSource.Cancel();
+                    }
+                    taak.Wait();
                 }
-                topTenDisplayTask.Stop();
+                catch (AggregateException aggregateException)
+                {
+                    var unexpectedExceptions = aggregateException.Flatten().InnerExceptions.Where(e => !(e is TaskCanceledException)).ToArray();
+                    foreach (var e in unexpectedExceptions)
+                    {
+                        Console.Error.WriteLine($"[{e.GetType().Name}]: {e.Message}");
+                    }
+                    if (unexpectedExceptions.Any())
+                    {
+                        Console.ReadKey();
+                        return -1;
+                    }
+                }
+                finally
+                {
+                    topTenDisplayTask.Stop();
+                }
             }
+            return 0;
         }
     }
 }
