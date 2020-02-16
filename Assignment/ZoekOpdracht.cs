@@ -112,7 +112,10 @@ namespace Assignment
         {
             var eerstePagina = await bron.HaalPagina(1, cancellationToken);
             var aantalPaginas = eerstePagina.Paging.AantalPaginas;
-            if (aantalPaginas < 1) throw new UnexpectedApiResponseException("Incorrect number of pages was returned");
+            if (aantalPaginas < 1)
+            {
+                throw new UnexpectedApiResponseException("Incorrect number of pages was returned: " + aantalPaginas);
+            }
             progress.PagesComplete = new bool[aantalPaginas];
             progress.PagesComplete[0] = true;
             outputQueue.Add(eerstePagina.Objects);
