@@ -11,10 +11,10 @@ namespace Assignment
         private readonly TopTen topTen;
         private readonly Action<Makelaar[]> outputAction;
         private readonly bool useDelay;
-        private readonly FetchProgress progress;
+        private readonly IFetchProgress progress;
         private readonly CancellationToken cancellationToken;
 
-        public TopTienWeergaveTaak(BlockingCollection<WoonObject[]> inputQueue, FetchProgress progress, Action<Makelaar[]> outputAction, bool useDelay, CancellationToken cancellationToken)
+        public TopTienWeergaveTaak(BlockingCollection<WoonObject[]> inputQueue, IFetchProgress progress, Action<Makelaar[]> outputAction, bool useDelay, CancellationToken cancellationToken)
         {
             this.queue = inputQueue;
             this.topTen = new TopTen();
@@ -40,7 +40,14 @@ namespace Assignment
                     progress.Print();
                     if (useDelay)
                     {
-                        Task.Delay(300, cancellationToken).Wait();
+                        try
+                        {
+                            Task.Delay(300, cancellationToken).Wait();
+                        }
+                        catch (AggregateException)
+                        {
+                            // stopping is enough
+                        }
                     }
                 }
             });
