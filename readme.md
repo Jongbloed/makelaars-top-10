@@ -43,3 +43,8 @@ Ik liep er nog tegenaan dat ik inderdaad probeerde om de voortgang van de api da
 Ik heb overwogen om de voortgang ("pagina x van y is binnen") aan de queue messages te plakken, maar dan zou het niet meer kloppen in het geval dat de gebruiker er voor kiest om het in zijn eigen tempo weer te geven. De data is dan eigenlijk al veel verder binnen, en je kijkt naar het verleden.
 En het leek me juist enig om de data voortgang wel in real time te zien.
 Dus heb ik ervoor gekozen om een apart gedeeld object te maken, dat geupdate wordt door de data thread, en door de output thread aangeroepen wordt om zich naar het scherm te schrijven. Op die manier zie je wel de echte voortgang, en wordt niet de schermuitvoer in de war gestuurd.
+
+Elk 'sterretje' dat ingevuld wordt, staat voor een pagina die opgehaald is. Je ziet dus letterlijk de data binnendruppelen, en in welke volgorde het gaat.
+
+** Motivatie voor de console-app
+Wat ik in het begin voor me zag was een webinterface. Ik had bijvoorbeeld het ook leuk gevonden om de gegevens en de voortgang met een React app weer te geven, bijvoorbeeld. Maar mijn inschatting was dat dat erg veel tijd kan kosten om goed te krijgen, en die tijd wilde ik in deze context liever besteden aan een multithreading oplossing met een asynchrone queue, dan aan het correct doen uitlijnen van een div.
