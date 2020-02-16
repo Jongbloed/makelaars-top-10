@@ -90,10 +90,10 @@ namespace Assignment
         public void Print()
         {
             Console.SetCursorPosition(2, 16);
-            Console.Write($"|{new string(PagesComplete.Select(b => b ? '×' : ' ').ToArray())}| {ProgressPercentageString()}");
+            Console.Write($"|{new string(PagesComplete.Select(b => b ? '×' : ' ').ToArray())}| {GetProgressPercentageString()}");
         }
         public bool[] PagesComplete = new bool[0];
-        public string ProgressPercentageString() =>
+        string GetProgressPercentageString() =>
             $"{PagesComplete.Count(x => x) / (float)PagesComplete.Length:P0} geladen...";
     }
 
