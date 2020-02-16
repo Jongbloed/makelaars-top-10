@@ -34,7 +34,7 @@ namespace Assignment
             }
         }
 
-        public Makelaar[] GetTopTen() // TODO test the output of this method
+        public Makelaar[] GetTopTen()
         {
             return makelaars.Values
                 .OrderByDescending(x => x.AantalListings)
