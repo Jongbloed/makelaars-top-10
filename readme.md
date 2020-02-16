@@ -48,3 +48,7 @@ Elk 'sterretje' dat ingevuld wordt, staat voor een pagina die opgehaald is. Je z
 
 ** Motivatie voor de console-app
 Wat ik in het begin voor me zag was een webinterface. Ik had bijvoorbeeld het ook leuk gevonden om de gegevens en de voortgang met een React app weer te geven, bijvoorbeeld. Maar mijn inschatting was dat dat erg veel tijd kan kosten om goed te krijgen, en die tijd wilde ik in deze context liever besteden aan een multithreading oplossing met een asynchrone queue, dan aan het correct doen uitlijnen van een div.
+
+** Discussie
+Ik merk dat ik ergens geen rekening mee heb gehouden: als je de applicatie meerdere keren na elkaar uitvoert, overschrijd je sneller de requestlimiet van de API. De requests van de vorige run tellen nog mee. Het afwachten van de minuut is niet afdoende in dit geval, en de data wordt niet volledig geladen.
+Ik wil eigenlijk nog inbouwen dat de paginanummers waarvan de request terugkwam met een 401, geretried worden, zodat uiteindelijk wel alle data binnenkomt.
