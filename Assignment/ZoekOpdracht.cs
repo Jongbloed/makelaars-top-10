@@ -26,6 +26,10 @@ namespace Assignment
 
     class UnexpectedApiResponseException : Exception
     {
+        public UnexpectedApiResponseException(string message)
+            : base(message)
+        { }
+
         public UnexpectedApiResponseException(Exception innerException)
             : base("Failed to parse response from API", innerException)
         { }
@@ -108,6 +112,7 @@ namespace Assignment
         {
             var eerstePagina = await bron.HaalPagina(1, cancellationToken);
             var aantalPaginas = eerstePagina.Paging.AantalPaginas;
+            if (aantalPaginas < 1) throw new UnexpectedApiResponseException("Incorrect number of pages was returned");
             progress.PagesComplete = new bool[aantalPaginas];
             progress.PagesComplete[0] = true;
             outputQueue.Add(eerstePagina.Objects);
