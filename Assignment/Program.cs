@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Assignment
 {
-    class WoonObject
+    public class WoonObject
     {
         public int MakelaarId { get; set; }
         public string MakelaarNaam { get; set; }

@@ -3,14 +3,14 @@ using System.Linq;
 
 namespace Assignment
 {
-    class Makelaar
+    public class Makelaar
     {
         public int MakelaarId;
         public string MakelaarNaam;
         public int AantalListings;
     }
 
-    class TopTen
+    public class TopTen
     {
         private readonly Dictionary<int, Makelaar> makelaars = new Dictionary<int, Makelaar>();
 
