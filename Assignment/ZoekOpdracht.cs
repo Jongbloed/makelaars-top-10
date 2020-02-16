@@ -85,14 +85,20 @@ namespace Assignment
         public void Dispose() => httpClient.Dispose();
     }
 
-    class FetchProgress
+    interface IFetchProgress
+    {
+        void Print();
+        bool[] PagesComplete { get; set; }
+    }
+
+    class FetchProgress : IFetchProgress
     {
         public void Print()
         {
             Console.SetCursorPosition(2, 16);
             Console.Write($"|{new string(PagesComplete.Select(b => b ? '×' : ' ').ToArray())}| {GetProgressPercentageString()}");
         }
-        public bool[] PagesComplete = new bool[0];
+        public bool[] PagesComplete { get; set; } = new bool[0];
         string GetProgressPercentageString() =>
             $"{PagesComplete.Count(x => x) / (float)PagesComplete.Length:P0} geladen...";
     }
@@ -108,7 +114,7 @@ namespace Assignment
 
         public void Dispose() => bron.Dispose();
 
-        public async Task FetchAllAsync(BlockingCollection<WoonObject[]> outputQueue, FetchProgress progress, CancellationToken cancellationToken)
+        public async Task FetchAllAsync(BlockingCollection<WoonObject[]> outputQueue, IFetchProgress progress, CancellationToken cancellationToken)
         {
             var eerstePagina = await bron.HaalPagina(1, cancellationToken);
             var aantalPaginas = eerstePagina.Paging.AantalPaginas;
