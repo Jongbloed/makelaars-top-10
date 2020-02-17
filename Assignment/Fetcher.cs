@@ -30,7 +30,7 @@ namespace Assignment
 
         public void Dispose() => bron.Dispose();
 
-        public async Task FetchAllAsync(CancellationToken cancellationToken)
+        private async Task<int> HaalEerstePaginaEnLeesAantal(CancellationToken cancellationToken)
         {
             FundaResultaat eerstePagina;
             try
@@ -51,8 +51,14 @@ namespace Assignment
             progress.PagesComplete = new bool[aantalPaginas];
             progress.PagesComplete[0] = true;
             outputQueue.Add(eerstePagina.Objects);
+            return aantalPaginas;
+        }
 
-            foreach (var paginaNummer in Enumerable.Range(2, eerstePagina.Paging.AantalPaginas - 1))
+        public async Task FetchAllAsync(CancellationToken cancellationToken)
+        {
+            var aantalPaginas = await HaalEerstePaginaEnLeesAantal(cancellationToken);
+
+            foreach (var paginaNummer in Enumerable.Range(2, aantalPaginas - 1))
             {
                 paginaNummerWachtrij.Enqueue(paginaNummer);
             }
