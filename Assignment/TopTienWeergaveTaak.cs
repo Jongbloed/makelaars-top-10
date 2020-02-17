@@ -14,17 +14,16 @@ namespace Assignment
         private readonly IFetchProgress progress;
         private readonly CancellationToken cancellationToken;
 
-        public TopTienWeergaveTaak(BlockingCollection<WoonObject[]> inputQueue, IFetchProgress progress, Action<Makelaar[]> outputAction, bool useDelay, CancellationToken cancellationToken)
+        public TopTienWeergaveTaak(BlockingCollection<WoonObject[]> inputQueue, IFetchProgress progress, Action<Makelaar[]> outputAction, bool useDelay)
         {
             this.queue = inputQueue;
             this.topTen = new TopTen();
             this.outputAction = outputAction;
             this.useDelay = useDelay;
             this.progress = progress;
-            this.cancellationToken = cancellationToken;
         }
 
-        public void Start()
+        public void Start(CancellationToken cancellationToken)
         {
             Task.Run(() =>
             {

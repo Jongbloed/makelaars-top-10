@@ -43,10 +43,9 @@ namespace Assignment
                     useDelay: Console.ReadKey().KeyChar == 'y',
                     inputQueue: queue,
                     progress: progress,
-                    outputAction: makelaars => new ConsoleTable(makelaars).Print(),
-                    cancellationToken: cancellationTokenSource.Token
+                    outputAction: makelaars => new ConsoleTable(makelaars).Print()
                 );
-                topTenDisplayTask.Start();
+                topTenDisplayTask.Start(cancellationTokenSource.Token);
                 Console.Clear();
 
                 try
