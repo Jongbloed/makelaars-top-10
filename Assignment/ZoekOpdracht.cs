@@ -138,17 +138,17 @@ namespace Assignment
         }
 
         (int paginaNummer, Task taak)[] StartPaginaBatch(IEnumerable<int> batch, CancellationToken cancellationToken) {
-                return batch.Select(paginaNummer =>
+            return batch.Select(paginaNummer =>
+            {
+                var taak = bron.HaalPagina(paginaNummer, cancellationToken).ContinueWith(t =>
                 {
-                    var taak = bron.HaalPagina(paginaNummer, cancellationToken).ContinueWith(t =>
-                    {
-                        var woonObjecten = t.Result.Objects;
-                        progress.PagesComplete[paginaNummer - 1] = true;
-                        outputQueue.Add(woonObjecten);
-                    }, TaskContinuationOptions.OnlyOnRanToCompletion);
-                    return (paginaNummer, taak);
-                }).ToArray();
-            }
+                    var woonObjecten = t.Result.Objects;
+                    progress.PagesComplete[paginaNummer - 1] = true;
+                    outputQueue.Add(woonObjecten);
+                }, TaskContinuationOptions.OnlyOnRanToCompletion);
+                return (paginaNummer, taak);
+            }).ToArray();
+        }
 
         async Task FetchBatchPerMinute(IEnumerable<int>[] resterendePaginaNummerBatches, CancellationToken cancellationToken)
         {
