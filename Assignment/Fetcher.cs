@@ -77,27 +77,10 @@ namespace Assignment
                     {
                         break;
                     }
-                    lopendeTaken.Add(Task.Factory.StartNew(async (object paginaNummerBoxed) =>
-                    {
-                        int paginaNummerUnboxed = (int)paginaNummerBoxed;
-                        if (state == State.WaitingAMinute)
-                        {
-                            paginaNummerWachtrij.Enqueue(paginaNummer);
-                            return;
-                        }
-                        try
-                        {
-                            var fundaResultaat = await bron.HaalPagina(paginaNummer, cancellationToken);
-                            var woonObjecten = fundaResultaat.Objects;
-                            progress.PagesComplete[paginaNummer - 1] = true;
-                            outputQueue.Add(woonObjecten);
-                        }
-                        catch (RequestLimitExceededException)
-                        {
-                            paginaNummerWachtrij.Enqueue(paginaNummer);
-                            state = State.WaitingAMinute;
-                        }
-                    }, paginaNummer));
+                    lopendeTaken.Add(Task.Factory.StartNew(
+                        async (paginaNummerBoxed) => await LaadPagina(paginaNummerBoxed, cancellationToken), 
+                        paginaNummer
+                    ));
                 }
                 await Task.WhenAll(lopendeTaken);
                 var exceptions = lopendeTaken.Where(x => x.IsFaulted).Select(x => x.Exception).ToArray();
@@ -111,6 +94,28 @@ namespace Assignment
                     await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
                 }
                 state = State.Active;
+            }
+        }
+
+        async Task LaadPagina (object paginaNummerBoxed, CancellationToken cancellationToken)
+        {
+            int paginaNummerUnboxed = (int)paginaNummerBoxed;
+            if (state == State.WaitingAMinute)
+            {
+                paginaNummerWachtrij.Enqueue(paginaNummerUnboxed);
+                return;
+            }
+            try
+            {
+                var fundaResultaat = await bron.HaalPagina(paginaNummerUnboxed, cancellationToken);
+                var woonObjecten = fundaResultaat.Objects;
+                progress.PagesComplete[paginaNummerUnboxed - 1] = true;
+                outputQueue.Add(woonObjecten);
+            }
+            catch (RequestLimitExceededException)
+            {
+                paginaNummerWachtrij.Enqueue(paginaNummerUnboxed);
+                state = State.WaitingAMinute;
             }
         }
     }
