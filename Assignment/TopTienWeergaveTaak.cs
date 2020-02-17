@@ -12,7 +12,6 @@ namespace Assignment
         private readonly Action<Makelaar[]> outputAction;
         private readonly bool useDelay;
         private readonly IFetchProgress progress;
-        private readonly CancellationToken cancellationToken;
 
         public TopTienWeergaveTaak(BlockingCollection<WoonObject[]> inputQueue, IFetchProgress progress, Action<Makelaar[]> outputAction, bool useDelay)
         {
