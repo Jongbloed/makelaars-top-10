@@ -13,13 +13,13 @@ namespace Assignment
         public string Adres { get; set; }
     }
 
-    class PaginaInfo
+    public class PaginaInfo
     {
         public int AantalPaginas { get; set; }
         public int HuidigePagina { get; set; }
     }
 
-    class FundaResultaat
+    public class FundaResultaat
     {
         public WoonObject[] Objects { get; set; }
         public PaginaInfo Paging { get; set; }

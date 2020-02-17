@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace Assignment
 {
-    interface IWoonObjectBron : IDisposable
+    public interface IWoonObjectBron : IDisposable
     {
         Task<FundaResultaat> HaalPagina(int pagina, CancellationToken cancellationToken);
     }
@@ -85,7 +85,7 @@ namespace Assignment
         public void Dispose() => httpClient.Dispose();
     }
 
-    interface IFetchProgress
+    public interface IFetchProgress
     {
         void Print();
         bool[] PagesComplete { get; set; }
@@ -103,7 +103,7 @@ namespace Assignment
             $"{PagesComplete.Count(x => x) / (float)PagesComplete.Length:P0} geladen...";
     }
 
-    class Fetcher : IDisposable
+    public class Fetcher : IDisposable
     {
         private readonly IWoonObjectBron bron;
         private readonly IFetchProgress progress;
