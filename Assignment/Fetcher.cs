@@ -32,7 +32,17 @@ namespace Assignment
 
         public async Task FetchAllAsync(CancellationToken cancellationToken)
         {
-            var eerstePagina = await bron.HaalPagina(1, cancellationToken);
+            FundaResultaat eerstePagina;
+            try
+            {
+                eerstePagina = await bron.HaalPagina(1, cancellationToken);
+            }
+            catch (RequestLimitExceededException)
+            {
+                state = State.WaitingAMinute;
+                await Task.Delay(TimeSpan.FromMinutes(1));
+                eerstePagina = await bron.HaalPagina(1, cancellationToken);
+            }
             var aantalPaginas = eerstePagina.Paging.AantalPaginas;
             if (aantalPaginas < 1)
             {
