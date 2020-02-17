@@ -50,7 +50,7 @@ namespace Assignment
 
                 try
                 {
-                    using (var bron = new Fetcher(new WoonObjectBron(zoekOpdracht), progress, queue))
+                    using (var bron = new Fetcher(new WoonObjectBron(zoekOpdracht, new ApiClient()), progress, queue))
                     {
                         taak = bron.FetchAllAsync(cancellationTokenSource.Token);
 

@@ -24,7 +24,7 @@ namespace Assignment
         { }
     }
 
-    class UnexpectedApiResponseException : Exception
+    public class UnexpectedApiResponseException : Exception
     {
         public UnexpectedApiResponseException(string message)
             : base(message)
@@ -39,25 +39,47 @@ namespace Assignment
         { }
     }
 
-    class WoonObjectBron : IWoonObjectBron
+    public interface IApiClient : IDisposable
     {
-        private readonly string pageUrlTemplate;
+        Task<HttpResponseMessage> GetAsync(string url, CancellationToken cancellationToken);
+    }
+
+    public class ApiClient : IApiClient
+    {
         private readonly HttpClient httpClient;
 
-        public WoonObjectBron(string zoekOpdracht)
+        public ApiClient()
         {
-            pageUrlTemplate = $@"/feeds/Aanbod.svc/json/ac1b0b1572524640a0ecc54de453ea9f/?type=koop&zo=/{zoekOpdracht}/&page={{0}}&pagesize=25";
             httpClient = new HttpClient
             {
                 BaseAddress = new Uri("http://partnerapi.funda.nl")
             };
         }
 
+        public void Dispose() => httpClient.Dispose();
+
+        public Task<HttpResponseMessage> GetAsync(string url, CancellationToken cancellationToken)
+        {
+            return httpClient.GetAsync(url, cancellationToken);
+        }
+    }
+
+    public class WoonObjectBron : IWoonObjectBron
+    {
+        private readonly string pageUrlTemplate;
+        private readonly IApiClient apiClient;
+
+        public WoonObjectBron(string zoekOpdracht, IApiClient apiClient)
+        {
+            pageUrlTemplate = $@"/feeds/Aanbod.svc/json/ac1b0b1572524640a0ecc54de453ea9f/?type=koop&zo=/{zoekOpdracht}/&page={{0}}&pagesize=25";
+            this.apiClient = apiClient;
+        }
+
         private string PageUrl(int pagina) => string.Format(pageUrlTemplate, pagina);
 
         public async Task<FundaResultaat> HaalPagina(int pagina, CancellationToken cancellationToken)
         {
-            var response = await httpClient.GetAsync(PageUrl(pagina), cancellationToken);
+            var response = await apiClient.GetAsync(PageUrl(pagina), cancellationToken);
             if (response.IsSuccessStatusCode)
             {
                 var rawResult = await response.Content.ReadAsStringAsync();
@@ -82,7 +104,7 @@ namespace Assignment
             }
         }
 
-        public void Dispose() => httpClient.Dispose();
+        public void Dispose() => apiClient.Dispose();
     }
 
     public interface IFetchProgress
