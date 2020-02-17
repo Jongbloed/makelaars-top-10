@@ -86,6 +86,10 @@ namespace Assignment
                 try
                 {
                     var fundaResultaat = JsonConvert.DeserializeObject<FundaResultaat>(rawResult);
+                    if (fundaResultaat.Paging == null)
+                    {
+                        throw new UnexpectedApiResponseException("Response malformed: Paging section missing");
+                    }
                     return fundaResultaat;
                 }
                 catch (JsonException jsonException)
