@@ -24,7 +24,7 @@ namespace Assignment
 
         public void Start(CancellationToken cancellationToken)
         {
-            Task.Run(() =>
+            Task.Run(async() =>
             {
                 while (true)
                 {
@@ -40,9 +40,9 @@ namespace Assignment
                     {
                         try
                         {
-                            Task.Delay(300, cancellationToken).Wait();
+                            await Task.Delay(300, cancellationToken);
                         }
-                        catch (AggregateException)
+                        catch (OperationCanceledException)
                         {
                             // stopping is enough
                         }
