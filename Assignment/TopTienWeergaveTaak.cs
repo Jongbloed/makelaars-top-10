@@ -28,11 +28,7 @@ namespace Assignment
             {
                 while (true)
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
-                    var meerObjecten = queue.Take();
+                    var meerObjecten = queue.Take(cancellationToken);
                     topTen.AddWoonObjecten(meerObjecten);
                     outputAction(topTen.GetTopTen());
                     progress.Print();
