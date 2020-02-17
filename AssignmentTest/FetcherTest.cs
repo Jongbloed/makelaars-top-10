@@ -41,7 +41,8 @@ namespace AssignmentTest
                             AantalPaginas = 1,
                             HuidigePagina = paginaNummer,
                         }
-                    }));
+                    }
+                ));
             fakeProgress = new FakeProgress();
             blockingQueue = new BlockingCollection<WoonObject[]>();
             testFetcher = new Fetcher(fakeWoonObjectBron.Object, fakeProgress, blockingQueue);
