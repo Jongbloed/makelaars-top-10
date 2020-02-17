@@ -52,3 +52,5 @@ Wat ik in het begin voor me zag was een webinterface. Ik had bijvoorbeeld het oo
 ** Discussie **
 Ik merk dat ik ergens geen rekening mee heb gehouden: als je de applicatie meerdere keren na elkaar uitvoert, overschrijd je sneller de requestlimiet van de API. De requests van de vorige run tellen nog mee. Het afwachten van de minuut is niet afdoende in dit geval, en de data wordt niet volledig geladen.
 Ik wil eigenlijk nog inbouwen dat de paginanummers waarvan de request terugkwam met een 401, geretried worden, zodat uiteindelijk wel alle data binnenkomt.
+
+Update 17/2: retryen geimplementeerd. Applicatie laadt nu altijd 100%, ook al draai je hem meerdere keren snel achter elkaar.
