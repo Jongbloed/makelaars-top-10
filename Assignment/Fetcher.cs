@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using MoreLinq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -11,24 +10,6 @@ using Assignment.Data;
 
 namespace Assignment
 {
-    public interface IFetchProgress
-    {
-        void Print();
-        bool[] PagesComplete { get; set; }
-    }
-
-    class FetchProgress : IFetchProgress
-    {
-        public void Print()
-        {
-            Console.SetCursorPosition(2, 16);
-            Console.Write($"|{new string(PagesComplete.Select(b => b ? '×' : ' ').ToArray())}| {GetProgressPercentageString()}");
-        }
-        public bool[] PagesComplete { get; set; } = new bool[0];
-        string GetProgressPercentageString() =>
-            $"{PagesComplete.Count(x => x) / (float)PagesComplete.Length:P0} geladen...";
-    }
-
     public class Fetcher : IDisposable
     {
         private readonly IWoonObjectBron bron;
