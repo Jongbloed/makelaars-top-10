@@ -133,7 +133,7 @@ namespace Assignment
             await FetchBatchPerMinute(resterendePaginaNummerBatches, progress, cancellationToken, outputQueue);
         }
 
-        (int paginaNummer, Task taak)[] startPaginaBatch(IEnumerable<int> batch, CancellationToken cancellationToken, IFetchProgress progress, BlockingCollection<WoonObject[]> outputQueue) {
+        (int paginaNummer, Task taak)[] StartPaginaBatch(IEnumerable<int> batch, CancellationToken cancellationToken, IFetchProgress progress, BlockingCollection<WoonObject[]> outputQueue) {
                 return batch.Select(paginaNummer =>
                 {
                     var taak = bron.HaalPagina(paginaNummer, cancellationToken).ContinueWith(t =>
@@ -154,7 +154,7 @@ namespace Assignment
 
                 var batch = resterendePaginaNummerBatches[batchIndex];
                 var timer = Stopwatch.StartNew();
-                var takenBatch = startPaginaBatch(batch, cancellationToken, progress, outputQueue);
+                var takenBatch = StartPaginaBatch(batch, cancellationToken, progress, outputQueue);
 
                 await Task.WhenAll(takenBatch.Select(x => x.taak));
 
