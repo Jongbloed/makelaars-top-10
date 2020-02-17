@@ -1,4 +1,5 @@
 using Assignment;
+using Assignment.Data;
 using NUnit.Framework;
 
 namespace Tests
