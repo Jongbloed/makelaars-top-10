@@ -126,7 +126,14 @@ namespace Assignment
             progress.PagesComplete[0] = true;
             outputQueue.Add(eerstePagina.Objects);
 
-            (int paginaNummer, Task taak)[] startPaginaBatch(IEnumerable<int> batch) {
+            var resterendePaginaNummerBatches = Enumerable.Range(2, eerstePagina.Paging.AantalPaginas - 1)
+                .Batch(99) // do not do > 100 requests per minute, also counting the first one
+                .ToArray();
+
+            await FetchBatchPerMinute(resterendePaginaNummerBatches, progress, cancellationToken, outputQueue);
+        }
+
+        (int paginaNummer, Task taak)[] startPaginaBatch(IEnumerable<int> batch, CancellationToken cancellationToken, IFetchProgress progress, BlockingCollection<WoonObject[]> outputQueue) {
                 return batch.Select(paginaNummer =>
                 {
                     var taak = bron.HaalPagina(paginaNummer, cancellationToken).ContinueWith(t =>
@@ -139,17 +146,15 @@ namespace Assignment
                 }).ToArray();
             }
 
-            var resterendePaginaNummerBatches = Enumerable.Range(2, eerstePagina.Paging.AantalPaginas - 1)
-                .Batch(99) // do not do > 100 requests per minute, also counting the first one
-                .ToArray();
-
+        async Task FetchBatchPerMinute(IEnumerable<int>[] resterendePaginaNummerBatches, IFetchProgress progress, CancellationToken cancellationToken, BlockingCollection<WoonObject[]> outputQueue)
+        {
             for (var batchIndex = 0; batchIndex < resterendePaginaNummerBatches.Length; batchIndex++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var batch = resterendePaginaNummerBatches[batchIndex];
                 var timer = Stopwatch.StartNew();
-                var takenBatch = startPaginaBatch(batch);
+                var takenBatch = startPaginaBatch(batch, cancellationToken, progress, outputQueue);
 
                 await Task.WhenAll(takenBatch.Select(x => x.taak));
 
